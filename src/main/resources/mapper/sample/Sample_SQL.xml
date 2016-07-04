@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- mysql table -->
+<!-- create TABLE TB_BOARD -->
+<!-- ( -->
+<!--     IDX int(255) PRIMARY KEY auto_increment, -->
+<!--     PARENT_IDX numeric, -->
+<!--     TITLE VARCHAR(100) NOT NULL, -->
+<!--     CONTENTS VARCHAR(4000) NOT NULL, -->
+<!--     HIT_CNT numeric NOT NULL, -->
+<!--     DEL_GB VARCHAR(1) DEFAULT 'N' NOT NULL, -->
+<!--     CREA_DTM DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, -->
+<!--     CREA_ID VARCHAR(30) NOT NULL -->
+<!-- ); -->
+
+
+<!-- CREATE TABLE TB_FILE -->
+<!-- ( -->
+<!--   IDX   int(255) auto_increment, -->
+<!--   BOARD_IDX numeric NOT NULL, -->
+<!--   ORIGINAL_FILE_NAME VARCHAR(260) NOT NULL, -->
+<!--   STORED_FILE_NAME VARCHAR(36) NOT NULL, -->
+<!--   FILE_SIZE numeric, -->
+<!--   CREA_DTM  DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, -->
+<!--   CREA_ID   VARCHAR(30) NOT NULL, -->
+<!--   DEL_GB    VARCHAR(1) DEFAULT 'N' NOT NULL, -->
+<!--   PRIMARY KEY (IDX) -->
+<!-- ); -->
+
+<mapper namespace="sample">
+	
+	<select id="selectBoardList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT
+			    IDX,
+			    TITLE,
+			    HIT_CNT,
+			    CREA_DTM
+			FROM
+			    TB_BOARD
+			WHERE
+				DEL_GB = 'N'
+			ORDER BY IDX DESC
+		]]>
+	</select>
+	
+	<insert id="insertBoard" parameterType="hashmap"  useGeneratedKeys="true" keyProperty="IDX">
+	<!-- 		 useGeneratedKeys는 MyBatis에서 제공하는 기능으로 DB에 입력(insert, update)시 데이터베이스에서 자동적으로 증가되는 키를 받는 JDBC의 getGeneratedKeys() 메서드를 사용하도록 하는것이다.  -->
+<!-- 		 여기서 자동적으로 증가가 되는 키는 MySql이나 MSSql의 Auto Increment가 설정된 컬럼을 의미한다.  -->
+<!-- 		그 다음으로 keyProperty는 getGeneratedKeys() 메서드나 insert구문의 selectKey에 의해 선택된 키를 셋팅하는 속성이다.  -->
+<!-- 		사실 MySql이나 MsSQL처럼 자동생성키 컬럼을 지원하는 DB에서는 이 두가지만 사용하면 되지만, Oracle과 같이 자동생성키 기능이 없는 경우는 추가적인 작업(selectKey))을 해야 한다.  -->
+<!-- 		<selectKey keyProperty="IDX" resultType="string" order="BEFORE"> -->
+<!-- 			select SEQ_TB_BOARD_IDX.NEXTVAL from DUAL -->
+<!-- 		</selectKey> -->
+<!-- 		(order 속성이 BEFORE로 되어있기 때문에) 그 값이 MAP에 IDX라는 키로 저장 -->
+
+		
+		<selectKey keyProperty="IDX" resultType="string" order="BEFORE">
+			SELECT * FROM (SELECT MAX(IDX)+1 FROM TB_BOARD) NEXT
+		</selectKey>
+		<![CDATA[
+			INSERT INTO TB_BOARD
+			(
+				TITLE,
+				CONTENTS,
+				HIT_CNT,
+				DEL_GB,
+				CREA_DTM,
+				CREA_ID
+			)
+			VALUES
+			(
+				#{TITLE}, 
+				#{CONTENTS},
+				0,
+				'N',
+				now(),
+				'Admin'
+			)
+		]]>
+		<!--MyBatis에서는 변수 대입을 #{변수명}으로 사용한다. -->
+	</insert>
+	
+	<update id="updateHitCnt" parameterType="hashmap">
+	    <![CDATA[
+	        UPDATE TB_BOARD 
+	        SET
+	            HIT_CNT = ifnull(HIT_CNT, 0) + 1
+	        WHERE
+	            IDX = #{IDX}    
+	    ]]>
+	</update>
+	 
+	<select id="selectBoardDetail" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	        SELECT
+	            IDX,
+	            HIT_CNT,
+	            CREA_ID,
+	            CREA_DTM,
+	            TITLE,
+	            CONTENTS
+	        FROM
+	            TB_BOARD
+	        WHERE
+	            IDX = #{IDX}        
+	    ]]>
+	</select>
+	
+	<update id="updateBoard" parameterType="hashmap">
+	    <![CDATA[
+	        UPDATE TB_BOARD 
+	        SET
+	            TITLE = #{TITLE},
+	            CONTENTS = #{CONTENTS}
+	        WHERE
+	            IDX = #{IDX}    
+	    ]]>
+	</update>
+	
+	<update id="deleteBoard" parameterType="hashmap">
+	    <![CDATA[
+	        UPDATE TB_BOARD
+	        SET
+	            DEL_GB = 'Y'
+	        WHERE
+	            IDX = #{IDX}
+	    ]]>
+	</update>
+	
+	<insert id="insertFile" parameterType="hashmap">
+
+	    <![CDATA[
+	        INSERT INTO TB_FILE
+	        (
+	            BOARD_IDX,
+	            ORIGINAL_FILE_NAME,
+	            STORED_FILE_NAME,
+	            FILE_SIZE,
+	            CREA_ID
+	        )
+	        VALUES
+	        (
+	            #{BOARD_IDX},
+	            #{ORIGINAL_FILE_NAME},
+	            #{STORED_FILE_NAME},
+	            #{FILE_SIZE},
+	            'Admin'
+	        )
+	    ]]>
+	</insert>
+	
+</mapper>
