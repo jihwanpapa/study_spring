@@ -68,7 +68,9 @@ public class SampleController {
 	public ModelAndView openBoardDetail(CommandMap commandMap) throws Exception{
 		ModelAndView mv = new ModelAndView("/sample/boardDetail");
 		Map<String, Object> map = sampleService.selectBoardDetail(commandMap.getMap());
-		mv.addObject("map",map);
+		//mv.addObject("map",map);
+		mv.addObject("map", map.get("map"));
+		mv.addObject("list", map.get("list"));
 		
 		return mv;
 	}
@@ -76,16 +78,28 @@ public class SampleController {
 	@RequestMapping(value="/sample/openBoardUpdate.do")
 	public ModelAndView openBoardUpdate(CommandMap commandMap) throws Exception{
 		ModelAndView mv = new ModelAndView("/sample/boardUpdate");
+		
 		Map<String, Object> map = sampleService.selectBoardDetail(commandMap.getMap());
-		mv.addObject("map",map);
+		//mv.addObject("map",map);
+		mv.addObject("map",map.get("map"));
+		mv.addObject("list",map.get("list"));
 		
 		return mv;
 	}
 	
+//	게시글을 수정할 때 해당되는 첨부파일의 수정은 등록과 다르게 좀 복잡한 프로세스를 가진다. 
+//	다음의 경우를 생각해보자.
+//	1) 게시글의 내용만 수정을 하고, 첨부파일은 수정하지 않는다.
+//	2) 첨부파일을 수정할 때 기존에 등록한 파일을 변경한다. 
+//	3) 기존에 등록한 파일은 놔두고, 새로운 파일을 추가한다. 
+//	4) 기존에 등록한 파일을 모두 삭제하고, 새로운 파일을 등록한다.
+//	5) 기존에 등록한 파일의 일부를 삭제하고, 새로운 파일을 등록한다.
+
 	@RequestMapping(value="/sample/updateBoard.do")
-	public ModelAndView updateBoard(CommandMap commandMap) throws Exception{
+	public ModelAndView updateBoard(CommandMap commandMap, HttpServletRequest request) throws Exception{
 		ModelAndView mv = new ModelAndView("redirect:/sample/openBoardDetail.do");
-		sampleService.updateBoard(commandMap.getMap());
+		//sampleService.updateBoard(commandMap.getMap());
+		sampleService.updateBoard(commandMap.getMap(), request);
 		mv.addObject("IDX", commandMap.get("IDX"));
 		return mv;
 	}

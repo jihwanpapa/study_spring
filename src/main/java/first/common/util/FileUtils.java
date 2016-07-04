@@ -30,11 +30,13 @@ public class FileUtils {
 		Map<String, Object> listMap = null;
 		
 		String boardIdx = (String)map.get("IDX"); //ServiceImpl 영역에서 전달해준 map에서 신규 생성되는 게시글의 번호를 받아오도록 함.
+		String requestName = null;
+		String idx = null;
 		
-		File file = new File(filePath);
-		if(file.exists()==false){
-			file.mkdirs(); //파일을 저장할 경로에 해당폴더가 없으면 폴더를 생성하도록 하였다. 
-		}
+//		File file = new File(filePath);
+//		if(file.exists()==false){
+//			file.mkdirs(); //파일을 저장할 경로에 해당폴더가 없으면 폴더를 생성하도록 하였다. 
+//		}
 		
 		while(iterator.hasNext()){
 			multipartFile = multipartHttpServletRequest.getFile(iterator.next());
@@ -43,16 +45,28 @@ public class FileUtils {
 				originalFileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
 				storedFileName = CommonUtils.getRandomString() + originalFileExtension;
 				
-				file = new File(filePath + storedFileName);
-				multipartFile.transferTo(file); //지정된 경로에 파일을 생성
+//				file = new File(filePath + storedFileName);
+//				multipartFile.transferTo(file); //지정된 경로에 파일을 생성
+				multipartFile.transferTo(new File(filePath + storedFileName));
 				
 				listMap = new HashMap<String,Object>();
+				listMap.put("IS_NEW", "Y");
 				listMap.put("BOARD_IDX", boardIdx);
 				listMap.put("ORIGINAL_FILE_NAME", originalFileName);
 				listMap.put("STORED_FILE_NAME", storedFileName);
 				listMap.put("FILE_SIZE", multipartFile.getSize());
 				list.add(listMap);
 				
+			}else{
+				//multipartFile이 비어있는 경우
+				requestName = multipartFile.getName();
+				idx = "IDX_"+requestName.substring(requestName.indexOf("_")+1);
+				if(map.containsKey(idx) == true && map.get(idx) != null){
+					listMap = new HashMap<String, Object>();
+					listMap.put("IS_NEW", "N");
+					listMap.put("FILE_IDX", map.get(idx));
+					list.add(listMap);
+				}
 			}
 		}
 		return list;

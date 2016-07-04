@@ -150,4 +150,35 @@
 	    ]]>
 	</insert>
 	
+	<select id="selectFileList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			select 
+				IDX,
+				ORIGINAL_FILE_NAME,
+				round(file_size/1024,1) as FILE_SIZE
+			from
+				tb_file
+			where
+				board_idx = #{IDX}
+				and del_gb = 'N'
+		]]>
+	</select>
+	
+	<update id="deleteFileList" parameterType="hashmap">
+		<![CDATA[
+			update tb_file set
+				del_gb = 'Y'
+			where
+				board_idx = #{IDX}
+		]]>
+	</update>
+	
+	<update id="updateFile" parameterType="hashmap">
+		<![CDATA[
+			update tb_file set
+				del_gb = 'N'
+			where
+				idx = #{FILE_IDX}
+		]]>
+	</update>
 </mapper>

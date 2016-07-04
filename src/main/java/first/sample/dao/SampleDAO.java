@@ -15,6 +15,8 @@ public class SampleDAO extends AbstractDAO{
 		return (List<Map<String, Object>>)selectList("sample.selectBoardList", map);
 	}
 	
+	
+	
 	public void insertBoard(Map<String, Object> map) throws Exception{
 		insert("sample.insertBoard", map);
 	}
@@ -38,5 +40,19 @@ public class SampleDAO extends AbstractDAO{
 	
 	public void insertFile(Map<String, Object> map) throws Exception{
 		insert("sample.insertFile", map);
+	}
+	
+	// selectFileList 쿼리를 호출하는 역할
+	@SuppressWarnings("unchecked")
+	public List<Map<String, Object>> selectFileList(Map<String, Object> map) throws Exception{
+		return (List<Map<String, Object>>)selectList("sample.selectFileList", map);
+	}
+	
+	public void deleteFileList(Map<String, Object> map) throws Exception{
+		update("sample.deleteFileList", map);
+	}
+	
+	public void updateFile(Map<String, Object> map) throws Exception{
+		update("sample.updateFile", map);
 	}
 }
